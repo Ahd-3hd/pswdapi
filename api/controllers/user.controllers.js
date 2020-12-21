@@ -4,51 +4,66 @@ const jwt = require("jsonwebtoken");
 
 exports.signup = async function (req, res) {
   const { username, email, password } = req.body;
+
   if (username && email && password) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      username: username,
-      password: hashedPassword,
-      email: email,
-    });
     try {
-      const newUser = await user.save();
-      return res.json(newUser);
+      const user = new User({
+        username: username,
+        password: hashedPassword,
+        email: email,
+      });
+      await user.save();
+      const accessToken = jwt.sign({ email, username }, process.env.JWT_SECRET);
+      return res.json({
+        username,
+        email,
+        accessToken,
+      });
     } catch (error) {
       return res.status(500).json({ message: "something went wrong" });
     }
-  } else {
-    return res.status(400).json({ message: "check credentials" });
   }
+
+  return res.status(400).json({ message: "check credentials" });
 };
 
+// TODO: this is bad; fix this logic
 exports.signin = async function (req, res) {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+  if (token) {
+    try {
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+      return res.status(200).json({
+        username: user.username,
+        email: user.email,
+        token,
+      });
+    } catch (error) {
+      return res.status(400).json({ message: "you need to login" });
+    }
+  }
+
   const { email, password } = req.body;
   if (email && password) {
     try {
       const user = await User.findOne({ email });
       const isSame = await bcrypt.compare(password, user.password);
       if (isSame) {
-        const accessToken = jwt.sign(
-          {
-            username: user.username,
-            email: user.email,
-          },
+        const newToken = jwt.sign(
+          { email, username: user.username },
           process.env.JWT_SECRET
         );
         return res.status(200).json({
-          id: user._id,
           username: user.username,
-          email: user.email,
-          accessToken,
+          email,
+          token: newToken,
         });
-      } else {
-        return res.status(400).json({ message: "check your credentials" });
       }
     } catch (error) {
-      return res.status(400).json({ message: "something went wrong" });
+      console.log(error);
+      return res.status(400).json({ message: "check credentials" });
     }
-  } else {
-    return res.status(400).json({ message: "Check your credentials" });
   }
 };

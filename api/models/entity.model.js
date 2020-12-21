@@ -22,10 +22,6 @@ const EntitySchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  email: {
-    type: String,
-    required: true,
-  },
 });
 
 const Entity = mongoose.model("Entity", EntitySchema);
