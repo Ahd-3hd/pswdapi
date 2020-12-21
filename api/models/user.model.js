@@ -15,6 +15,7 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
     createIndexes: true,
+    unique: true,
   },
   createdAt: {
     type: Date,

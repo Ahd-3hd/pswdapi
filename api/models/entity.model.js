@@ -6,8 +6,14 @@ const EntitySchema = mongoose.Schema({
     required: true,
     min: 3,
     createIndexes: true,
+    unique: true,
   },
-  value: {
+  account: {
+    type: String,
+    required: true,
+    min: 3,
+  },
+  password: {
     type: String,
     required: true,
     min: 3,
@@ -15,6 +21,10 @@ const EntitySchema = mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+  email: {
+    type: String,
+    required: true,
   },
 });
 

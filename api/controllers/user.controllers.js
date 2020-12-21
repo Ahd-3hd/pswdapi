@@ -46,7 +46,7 @@ exports.signin = async function (req, res) {
         return res.status(400).json({ message: "check your credentials" });
       }
     } catch (error) {
-      return res.status(500).json({ message: "something went wrong" });
+      return res.status(400).json({ message: "something went wrong" });
     }
   } else {
     return res.status(400).json({ message: "Check your credentials" });
